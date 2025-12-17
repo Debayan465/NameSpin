@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WhatsApp Group Random Name Picker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f3f4f6;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .card {
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      padding: 24px;
+      max-width: 420px;
+      width: 100%;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      text-align: center;
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .name {
+      background: #f9fafb;
+      padding: 8px;
+      text-align: center;
+      border-radius: 10px;
+      font-size: 14px;
+      animation: pulse 0.6s infinite alternate;
+    }
+    .spinning .name {
+      animation-play-state: running;
+    }
+    @keyframes pulse {
+      from { transform: scale(1); }
+      to { transform: scale(1.05); }
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    .pick {
+      background: #2563eb;
+      color: #fff;
+    }
+    .reset {
+      background: #e5e7eb;
+      color: #111;
+    }
+    .winner {
+      margin-top: 16px;
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+      color: #16a34a;
+    }
+    .done {
+      text-align: center;
+      color: #dc2626;
+      font-weight: bold;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🎯 Random Name Picker</h1>
+    <div class="subtitle">Shared WhatsApp link • Picked names never repeat</div>
+
+    <div id="grid" class="grid"></div>
+
+    <button class="pick" onclick="pickName()">Pick One</button>
+    <button class="reset" onclick="resetNames()">Reset</button>
+
+    <div id="winner" class="winner"></div>
+    <div id="done" class="done"></div>
+  </div>
+
+  <script>
+    const INITIAL_NAMES = [
+      "Alice","Bob","Charlie","David","Emma","Frank","Grace","Hannah",
+      "Ian","Jack","Karen","Leo","Mia","Noah","Olivia","Paul",
+      "Quinn","Rose","Sam","Tina"
+    ];
+
+    const STORAGE_KEY = "whatsapp_random_picker";
+    let names = [];
+
+    function loadNames() {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        names = JSON.parse(stored);
+      } else {
+        names = [...INITIAL_NAMES];
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(names));
+      }
+      render();
+    }
+
+    function render() {
+      const grid = document.getElementById("grid");
+      grid.innerHTML = "";
+      names.forEach(name => {
+        const div = document.createElement("div");
+        div.className = "name";
+        div.textContent = name;
+        grid.appendChild(div);
+      });
+
+      document.getElementById("done").textContent =
+        names.length === 0 ? "All names have been picked 🎯" : "";
+    }
+
+    function pickName() {
+      if (names.length === 0) return;
+
+      document.getElementById("winner").textContent = "Spinning…";
+
+      setTimeout(() => {
+        const index = Math.floor(Math.random() * names.length);
+        const selected = names[index];
+        names.splice(index, 1);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(names));
+        document.getElementById("winner").textContent = `🎉 Selected: ${selected}`;
+        render();
+      }, 1500);
+    }
+
+    function resetNames() {
+      if (!confirm("Reset all picked names?")) return;
+      names = [...INITIAL_NAMES];
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(names));
+      document.getElementById("winner").textContent = "";
+      render();
+    }
+
+    loadNames();
+  </script>
+</body>
+</html>
